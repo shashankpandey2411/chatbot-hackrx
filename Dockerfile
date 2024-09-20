@@ -14,14 +14,14 @@ RUN curl -fsSL https://ollama.com/install.sh | sh
 # Copy your application files into the container
 COPY . .
 
-# Pull the model (this will run while the container is built)
-RUN ollama pull cniongolo/biomistral
-
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Create entrypoint script
+RUN echo '#!/bin/sh\nollama run &\nsleep 5\nollama pull cniongolo/biomistral\nuvicorn fast1:app --host 0.0.0.0 --port 8000' > /start.sh && chmod +x /start.sh
 
 # Expose the port for the FastAPI app
 EXPOSE 8000
 
-# Start the Ollama app and then run the FastAPI app
-CMD ["sh", "-c", "ollama run & uvicorn fast1:app --host 0.0.0.0 --port 8000"]
+# Use the entrypoint script
+ENTRYPOINT ["/start.sh"]
