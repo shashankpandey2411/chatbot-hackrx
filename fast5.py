@@ -2,8 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Header
 from pydantic import BaseModel
 import os
 import pandas as pd
-from langchain_community.embeddings import SentenceTransformerEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, CSVLoader
@@ -12,11 +11,16 @@ from langchain.docstore.document import Document
 import tempfile
 from collections import defaultdict
 
+# Import Chroma from langchain_chroma
+from langchain_chroma import Chroma
+
 # Initialize FastAPI app
 app = FastAPI()
 
 # In-memory storage for user sessions and chat history
-user_sessions = defaultdict(lambda: defaultdict(list))  # user_id -> session_id -> chat history
+user_sessions = defaultdict(lambda: defaultdict(list))
+
+
 
 # Function to extract text from a PDF file
 def extract_text_from_pdf(pdf_path):
@@ -86,7 +90,7 @@ def extract_text(file_path):
         return extract_text_from_xlsx(file_path)
     else:
         return ""
-
+    
 # Initialize LLM
 llm = Ollama(model="cniongolo/biomistral")
 
@@ -102,8 +106,8 @@ Only return the helpful answer below and nothing else and no questions to be ask
 Helpful answer:
 """
 
-# Initialize the Sentence Transformer Embeddings
-embeddings = SentenceTransformerEmbeddings(model_name="NeuML/pubmedbert-base-embeddings")
+# Initialize the Hugging Face Embeddings
+embeddings = HuggingFaceEmbeddings(model_name="NeuML/pubmedbert-base-embeddings")
 
 # Directory for Chroma DB (company data)
 company_data_directory = "chroma_db"
@@ -127,7 +131,7 @@ async def ask_question(request: QuestionRequest, x_user_id: str = Header(...), x
     try:
         # Retrieve relevant documents from company data vector store
         retriever = company_vector_store.as_retriever(search_kwargs={"k": 3})
-        docs = retriever.get_relevant_documents(question)
+        docs = retriever.invoke(question)  # Updated method
 
         if not docs:
             return {"response": "No relevant documents found."}
@@ -141,7 +145,7 @@ async def ask_question(request: QuestionRequest, x_user_id: str = Header(...), x
         formatted_prompt = prompt.format(context=context, question=question, chat_history=chat_history)
 
         # Get response from the LLM
-        response = llm.predict(formatted_prompt, max_token=2048)
+        response = llm.invoke(formatted_prompt, max_token=2048)  # Updated method
 
         # Store the current question and response in chat history
         user_sessions[user_id][session_id].append(f"Q: {question}\nA: {response.strip()}")
@@ -183,3 +187,11 @@ async def ingest_file(file: UploadFile = File(...)):
 
     except Exception as e:
         return {"status": f"Error: {str(e)}"}
+    
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
