@@ -8,9 +8,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ollama CLI (adjust according to the actual download method)
-# Assuming you can download the binary for Ollama CLI from a URL, replace with actual URL if needed
-RUN curl -fsSL https://ollama.ai/install | bash
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
 
 # Pull the model
 RUN ollama pull cniongolo/biomistral
