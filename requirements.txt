@@ -11,3 +11,4 @@ ollama
 torch
 langchain
 langchain-community
+python-multipart
