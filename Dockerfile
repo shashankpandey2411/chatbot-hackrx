@@ -18,9 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY requirements.txt . 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+
+# Pull the model
+RUN ollama pull cniongolo/biomistral
 
 EXPOSE 8000
 CMD ["uvicorn", "fast5:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
