@@ -1,29 +1,29 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PIP_NO_CACHE_DIR=1
-
-# Set working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
-
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpoppler-cpp-dev \
-    poppler-utils \
+RUN apt-get update && apt-get install -y \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt . 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Install Ollama CLI (adjust according to the actual download method)
+# Assuming you can download the binary for Ollama CLI from a URL, replace with actual URL if needed
+RUN curl -fsSL https://ollama.ai/install | bash
 
 # Pull the model
 RUN ollama pull cniongolo/biomistral
 
+# Copy project files
+COPY . /app
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose the port
 EXPOSE 8000
-CMD ["uvicorn", "fast5:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# Run the application
+CMD ["uvicorn", "fast1:app", "--host", "0.0.0.0", "--port", "8000"]
+
