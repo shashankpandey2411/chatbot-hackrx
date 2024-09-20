@@ -9,4 +9,5 @@ PyPDF2
 chromadb
 ollama
 torch
+langchain
 langchain-community
