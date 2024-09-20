@@ -15,7 +15,7 @@ RUN curl -fsSL https://ollama.com/install.sh | sh
 COPY . .
 
 # Pull the model separately
-RUN sleep 5 && ollama pull cniongolo/biomistral
+RUN ollama run & sleep 5 && ollama pull cniongolo/biomistral
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
