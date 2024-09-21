@@ -18,7 +18,7 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Create entrypoint script
-RUN echo '#!/bin/sh\nollama run &\nsleep 5\nollama pull cniongolo/biomistral\nuvicorn fast1:app --host 0.0.0.0 --port 8000' > /start.sh && chmod +x /start.sh
+RUN echo '#!/bin/sh\nollama run &\nsleep 5\nollama pull cniongolo/biomistral\nuvicorn fast5:app --host 0.0.0.0 --port 8000' > /start.sh && chmod +x /start.sh
 
 # Expose the port for the FastAPI app
 EXPOSE 8000
